@@ -695,8 +695,8 @@ def color_peaks(mindv, majdv, num_muts, reduct, k, order, n_max_peak, n_min_peak
 # output: tuple or int
 # Takes in a row and categorizes the row by the amount of ones 
 # and returns the corresponding variables to the ones 
-# e.g. the row [1,0,1,0] with the columns 1234, return (1,3)
-# e.g. the row [0,0,0,1] with columns 1234 returns 4
+# e.g. the row [1,0,1,0] with the columns 0123, return (0,2)
+# e.g. the row [0,0,0,1] with columns 0123 returns 3
 def categorize_row2(row):
     # copy row to not alter the data
     tempRow = np.copy(row)
@@ -1003,7 +1003,7 @@ def latex_table2(num_muts, df, coalition):
                 # for the last column we add the degree charater
                 if(col == 2):
                     mtable = mtable[:-4]
-                    mtable += "\\degree & "
+                    mtable += "^{\\circ} & "
                 
         # eliminate the last "& " of the row
         mtable = mtable[:-2]
@@ -1101,6 +1101,323 @@ def color_negative_red2(val):
     else:
         color = 'black'
     return 'color: %s' % color
+
+
+# input: int, int, int, dataframe
+# output: string
+# returns a string with latex code for a table of the given dataframe
+def latex_table3(coalition, df):
+    # create top of table
+    ttable = """\n
+\\begin{tabular}{|c|c|c|c||c|c|c|c|}
+    \hline
+    \multicolumn{8}{|c|}{Coalition %s} \\\ 
+    \hline
+    \multicolumn{4}{|c|}{Positive} & \multicolumn{4}{|c|}{Negative} \\\ 
+    \hline 
+    Order & Coalition & Value & Position & Order & Coalition & Value & Position \\\\
+    \hline \hline
+"""%(coalition)
+    
+    # middle of table
+    mtable = ""
+    
+    # get dataframe values
+    val = df.values
+    
+    # go thorugh the matrix 
+    for row in range(val.shape[0]):
+        # add tab at the beginning of each row or the table
+        mtable += "    "
+        for col in range(val.shape[1]):
+            # cols 0,1,5,6 have strings
+            # cols 2,7 have decimals
+            # cols 3,8 have ints
+            if(col in [0,1,4,5]):
+                # strings
+                # for entries that are not None
+                if(val[row,col]):
+                    if(col in [0,4]):
+                         mtable += "%s^{\\circ} & "%(val[row,col][:-1])
+                    else:
+                        mtable += "%s & "%(val[row,col])
+                # None entries
+                else:
+                    mtable += " & "
+            if(col in [2,6]):
+                # decimals
+                # we dont want to write nans in our table
+                if(math.isnan(val[row,col])):
+                    mtable += " & "
+                else:
+                    mtable += "%.4f & "%(val[row,col])
+            if(col in [3,7]):
+                # ints
+                # we dont want to write nans in our table
+                if(math.isnan(val[row,col])):
+                    mtable += " & "
+                else:
+                    mtable += "%d & "%(val[row,col])
+
+        # eliminate the last "& " of the row
+        mtable = mtable[:-2]
+        # add a line in between rows
+        mtable += "\\\ \hline \n"
+        
+    # bottom of table
+    btable = "\end{tabular} \n"
+    
+    # return all three parts of the table as one string
+    return ttable+mtable+btable
+
+# input: int, matrix, matrix, string, int, bool, string
+# output: dataframe
+# creates a dataframe for the values of a given coalition 
+# across different orders of a given grouping 
+def grouping_table(gene_mut, num_muts, mindv, majdv, coalition, k, save, file):
+# k_tables : name of function
+# num_muts, mindv, majdv, coalition, k, save, file
+
+    # change coalition to number representation
+    coal = []
+    for char in coalition:
+        coal.append(ord(char)-65)
+
+    # capture correct f_i
+    if(k >= np.floor(num_muts/2)):
+        DV = mindv
+    else:
+        DV = majdv
+
+    # variable for results   
+    table_orders = []
+    # calculate starting i
+    i = k - len(coalition)
+    positive = []
+    negative = []
+    for order in range(i-1,k+1):
+        # tables per order
+        pos = []
+        neg = []
+        # calc real fi
+        f = find_real_fis(gene_mut, DV, k, order)
+        # f = [v,v,v,v,v,...,v]
+        # if coalition subset of f, then get order, value(color), position(with degree)
+        for element in range(len(f)):
+            fnum = list(f[element][1]) # was a tuple
+            if(set(coal).issubset(set(fnum))):
+                # get label and value
+                flab = f[element][0]
+                fval = f[element][2]
+                # get position
+                if(fval < 0):
+                    place = len(f)-element
+                    neg.append( ["%d°"%int(len(fnum)),flab, fval, int(place)] )
+                else:
+                    place = element+1
+                    pos.append( ["%d°"%int(len(fnum)),flab, fval, int(place)] )
+        # make positive and negative lists the same size
+        # get longer list
+        if(len(pos) != len(neg)):
+            for j in range(abs(len(pos)-len(neg))):
+                if(len(pos) > len(neg)):
+                    neg.append( [None,None,None,None] )
+                else:
+                    pos.append( [None,None,None,None] )    
+        # add to lists
+        positive += pos
+        negative += neg
+
+    # add to table   
+    for j in range(len(positive)):
+        row = positive[j]+negative[j]
+        table_orders.append(row)
+
+    # create dataframe with data
+    dataframe = pd.DataFrame(table_orders, columns=["+Order","+Coalition","+Value","+Position","-Order","-Coalition","-Value","-Position"])
+    dataframe1 = dataframe.style.applymap(color_negative_red2)
+
+    # save the latex code for table in file
+    if(save == 1):
+        with open(file,'a') as tf:
+            s = latex_table3(coalition, dataframe)
+            tf.write(s)
+
+    return dataframe1
+
+# input: matrix, string, string, bool, string, list of strings, string, optional string
+# output: void
+# Creates scatterplot with hemoglobin levels of all pupulation and 
+# of a specified coalition (arg. 7, starting at 1) colored in a 
+# specified color (6th arg). It can also color two coalitions (optional arg 8)
+# 4th arg must be a list of len 1 (one coalition) or len 3 (two coalitions)
+# the sixthcolor in colors is for individuals that have both coalitions
+# first arg is the original dataset, second is a string of the pehnotype
+# third arg is the type of reduction of the dataset
+# fourth arg is the option to save the scatter plot in a file (arg. 5)
+def scatterplot_colored(data, phenotype, reduction, save, file, colors, coal1, coal2=None):
+    # get number of mutations
+    num_muts = data.shape[1]-1
+    # chang mutations from letters to numbers 
+    mut1 = []
+    for char in coal1:
+        mut1.append(ord(char)-65)
+    if(coal2):
+        mut2 = []
+        for char in coal2:
+            mut2.append(ord(char)-65)
+    # get pheno
+    pheno = data[:,-1]
+    # get mutations for each row 
+    nrows = data.shape[0]
+    mutations = []
+    for row in range(nrows):
+        # get mutations in row
+        cat = categorize_row2(data[row,:])
+        # categorize_row2 returns an int if there is only 
+        # one mutation in that row
+        if(isinstance(cat,int)):
+            mutations.append([cat])
+        # and a tuple otherwise
+        else:
+            mutations.append(list(cat))
+    # create scatterplot for the pheno
+    plt.scatter(x = range(len(pheno)),y = pheno, c = "gray")
+    # find indeces of coalitions
+    list1 = []
+    for i in range(len(mutations)):
+        if(set(mut1).issubset(set(mutations[i]))):
+            list1.append(i)
+    if(coal2):
+        list2 = []
+        for i in range(len(mutations)):
+            if(set(mut2).issubset(set(mutations[i]))):
+                list2.append(i)
+    # calculate average hemoglobin
+    average = sum(pheno)/len(pheno)
+    # calculate average coal1
+    sum1 = 0
+    for index in list1:
+        sum1 += pheno[index]
+    avg1 = sum1 / len(list1)
+    # calculate average coal2
+    if(coal2):
+        sum2 = 0
+        for index in list2:
+            sum2 += pheno[index]
+        avg2 = sum2 / len(list2)
+    # get indeces where coal1 and coal2 overlap to color differently
+    if(coal2):
+        list3 = []
+        for i in list1:
+            if(i in list2):
+                list3.append(i)
+        # if we have overlapping elements, we need a label
+        if(list3):
+            # set to eliminate duplicates
+            # sort to have in order
+            mut3 = sorted(list(set(mut1 + mut2)))
+            # letters to change numbers to letters
+            mutation_letters = string.ascii_uppercase[:num_muts]
+            coal3 = ""
+            for n in mut3:
+                coal3 += mutation_letters[n]
+    
+    # color the first element of coal1
+    # check if lista1 has elements
+    if(list1):
+        plt.scatter(x = [list1[0]] ,y=[pheno[list1[0]]], c = colors[0], label = coal1)  
+    # color first element of coal2
+    if(coal2):
+        # check if lista2 has elements
+        if(list2):
+            plt.scatter(x = [list2[0]] ,y=[pheno[list2[0]]], c = colors[1], label = coal2)
+        if(list3):
+            plt.scatter(x = [list3[0]] ,y=[pheno[list3[0]]], c = colors[2], label = coal3)
+    # color rest of elements from coal1
+    # check if there is more than one element to plot first
+    if(len(list1)>1):
+        for i in range(1,len(list1)):
+            plt.scatter(x = [list1[i]] ,y=[pheno[list1[i]]], c = colors[0])
+    # color rest of elements from coal2 and if there is more than one element in lista2
+    if(coal2 and len(list2)>1):
+        for i in range(1,len(list2)):
+            plt.scatter(x = [list2[i]] ,y=[pheno[list2[i]]], c = colors[1])
+        # color lista3 if there is more than one element
+        if(len(list3)>1):
+            for i in range(1,len(list3)):
+                plt.scatter(x = [list3[i]] ,y=[pheno[list3[i]]], c = colors[2])
+            
+    # x and y labels
+    plt.xlabel("Observations (In No Specific Order)") #this should remain the same
+    plt.ylabel("%s Level"%phenotype) #this should remain the same
+    # title
+    if(coal2):
+        plt.title("%s Reduction Dataset \n Coalitions %s and %s"%(reduction, coal1, coal2))
+    else:
+        plt.title("%s Reduction Dataset \n Coalition %s"%(reduction, coal1))
+    plt.tight_layout()
+    # limits of y axis
+    plt.ylim(min(pheno)-5, max(pheno)+5)  
+    # average lines
+    plt.axhline(y = average, color = 'k', linewidth=1.2, label="Average \n %d"%average)
+    plt.axhline(y = avg1, color = colors[0], linewidth=1.2, label="%s Avg. \n %d"%(coal1,avg1))
+    if(coal2):
+        plt.axhline(y = avg2, color = colors[1],linewidth=1.2, label="%s Avg. \n %d"%(coal2,avg2))
+    # legend
+    plt.legend(loc="best",bbox_to_anchor=(1.01,1),title="Coalitions") 
+    # save scatterplot
+    if(save == 1):
+        if(coal2):
+            plt.savefig("%s/SP_coalitions_%s_and_%s.png"%(file, coal1,coal2),bbox_inches="tight")
+        else:
+            plt.savefig("%s/SP_coalition_%s.png"%(file, coal1),bbox_inches="tight")
+    # show scatterplot
+    plt.show()
+
+# input: int, int, string, list of matrices
+# output: list of floats, list of strings
+# Takes in sub_data (4th argument), looks for matrix of groupings of
+# k (second argument) mutations, then outputs a list of the response 
+# variable of individuals that have the coalition given (3rd argument) 
+# and another list of the mutations those individuals have. The first 
+# argument is the total amount of mutations.
+# Important: this function works for k <= floor of num_muts/2
+def get_response(num_muts, k, muts, pdata):
+    # letters to change numbers to letters later on
+    mutation_letters = string.ascii_uppercase[:num_muts]
+    # change mutations from letters to numbers 
+    mutations = []
+    for char in muts:
+        mutations.append(ord(char)-65)
+    # get number of zeros
+    zeros = int(num_muts-k)
+    # get matrix of individuals with k mutations
+    for i in range(len(pdata)):
+        if(zeros == int(pdata[i][0])):
+            data = pdata[i][1]
+    # list to hold hemoglobin and combinations of mutations
+    pheno = []
+    mutation_combinations = []
+    # if mutations occur in the data, get rows where the mutations occur
+    for row in range(len(data)):
+        # categorize row by the mutations it has
+        cat = categorize_row2(data[row])
+        # fix some bugs here (tuples can't have length 1, work around this)
+        if(isinstance(cat, int)):
+            cat = [cat]
+        # check if mutations happen in this row
+        if(set(mutations).issubset(set(cat))):
+            # save hemoglobin
+            pheno.append(float(data[row][-1:]))
+            # save category 
+            # change category to letters and save the letters
+            new_cat = ""
+            for n in cat:
+                new_cat += mutation_letters[n]
+            mutation_combinations.append(new_cat)
+    # return list of hemoglobin and mutations
+    return pheno, mutation_combinations
 
 
 
