@@ -1,0 +1,301 @@
+---
+title: T-Tests for the the Body Weight after 70 Days of Female Rats, using Homozygous
+  Reduction
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+fifteen = c(33.28, 35.92)
+fourteen = c(42.08, 33.93, 35.1)
+thirteen = c(34.56, 28.39)
+twelve = c(29.68, 36.33)
+eleven = c(29.42)
+ten = c(32.85, 36.57) 
+nine = c(27.88, 34.29, 36.85, 31.71, 28.37, 35.51, 32.6 , 29.82)
+eight = c(33.34, 32.33, 33.7)
+seven = c(28.31, 28.39, 34.15, 32.51, 31.9 , 35.08, 28.62, 34.87, 38.59)
+six = c(29.18, 29.41, 33.56, 34.85)
+five = c(28.93, 30.28, 37.29, 31.71, 29.44, 31.49, 30.25, 30.53, 32.11,
+       28.64, 32.26)
+four = c(33.49, 33.9 , 28.94, 33.07, 33.17, 30.73, 28.37, 30.32, 30.41,
+       31.5)
+three = c(31.75, 30.7 , 28.78, 31.48, 33.88, 32.88, 27.97, 30.87, 27.89,
+       30.53, 29.03, 32.58)
+two = c(30.37, 26.52, 29.17, 28.02, 31.34, 35.11, 30.98, 29.78, 31.  ,
+       32.88, 27.29, 36.7 , 34.66, 31.43, 31.87)
+one = c(30.27, 30.21, 29.27, 31.06, 33.98, 32.8 , 30.47, 24.91, 35.94,
+       29.36, 30.1 , 29.05, 31.96)
+cero = c(31.83, 30.36, 33.77, 32.67, 31.45, 30.14, 29.18, 29.9 , 32.74,
+       36.17, 35.13, 32.92, 28.31, 29.35, 28.11, 31.14, 34.81, 33.19,
+       28.04, 30.25, 29.47, 30.72, 33.18, 29.95, 36.52, 30.42, 31.15,
+       31.75, 31.03, 30.63, 31.11, 31.07, 34.61, 30.64, 34.08, 27.78,
+       31.5 , 35.24, 33.95, 29.55, 31.62, 30.03, 31.5 , 26.12)
+
+EN = c(37.29, 38.59, 27.88, 32.85, 29.68, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataEN = c(five,seven,nine,ten,twelve,thirteen,fourteen,fifteen)
+
+EO = c(37.29, 34.87, 38.59, 27.88, 36.85, 32.85, 29.68, 33.28, 35.92)
+dataEO = c(five,seven,nine,ten,twelve,fifteen)
+
+FN = c(37.29, 27.88, 31.71, 32.85, 29.68, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataFN = c(five,nine,ten,twelve,thirteen,fourteen,fifteen)
+
+FL = c(34.15, 33.34, 32.33, 36.85, 31.71, 28.37, 35.51, 32.85, 29.42, 29.68, 36.33, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataFL = c(seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen)
+```
+### Coalition EN causes bwd70 to be Higher than Average
+#### Groupings of 5, 7, 9, 10, and 12 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(EN, dataEN, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(EN, dataEN, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition EN", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 7, 9, 10, and 12 to 15 Mutations")
+```
+
+
+### Coalition EO causes bwd70 to be Higher than Average
+#### Groupings of 5, 7, 9, 10, 12, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(EO, dataEO, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(EO, dataEO, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition EO", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 7, 9, 10, 12, and 15 Mutations")
+```
+
+### Coalition FN causes bwd70 to be Higher than Average
+#### Groupings of 5, 9, 10, and 12 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(FN, dataFN, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(FN, dataFN, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition FN", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 9, 10, and 12 to 15 Mutations")
+```
+
+### Coalition FL causes bwd70 to be Higher than Average
+#### Groupings of 7 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(FL, dataFL, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(FL, dataFL, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition FL", "Data"),
+        main = "Homozygous Reduction \n Groupings of 7 to 15 Mutations")
+```
+
+```{r, include=FALSE}
+BDE = c(33.9, 30.25, 32.11, 33.56, 35.08, 34.87, 38.59, 27.88, 32.6, 32.85, 36.57, 36.33, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataBDE = c(four,five,six,seven,nine,ten,twelve,thirteen,fourteen,fifteen)
+```
+### Coalition BDE causes bwd70 to be Higher than Average
+#### Groupings of 4 to 7, 9, 10, and 12 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(BDE, dataBDE, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(BDE, dataBDE, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition BDE", "Data"),
+        main = "Homozygous Reduction \n Groupings of 4 to 7, 9, 10, and 12 to 15 Mutations")
+```
+
+```{r, include=FALSE}
+BCDE = c(33.9, 30.25, 32.11, 33.56, 35.08, 34.87, 38.59, 27.88, 32.6, 32.85, 36.33, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataBCDE = c(four,five,six,seven,nine,ten,twelve,thirteen,fourteen,fifteen)
+
+ACDE = c(32.11, 33.56, 35.08, 34.87, 38.59, 27.88, 32.6, 32.85, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataACDE = c(five,six,seven,nine,ten,twelve,fourteen,fifteen)
+
+ABDE = c(32.11, 33.56, 35.08, 34.87, 38.59, 27.88, 32.6, 32.85, 36.57, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABDE = c(five,six,seven,nine,ten,fourteen,fifteen)
+```
+### Coalition BCDE causes bwd70 to be Higher than Average
+#### Groupings of 4, 5, 6, 7, 9, 10, and 12 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(BCDE, dataBCDE, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(BCDE, dataBCDE, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition BCDE", "Data"),
+        main = "Homozygous Reduction \n Groupings of 4, 5, 6, 7, 9, 10, and 12 to 15 Mutations")
+```
+
+### Coalition ACDE causes bwd70 to be Higher than Average
+#### Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ACDE, dataACDE, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ACDE, dataACDE, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ACDE", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+### Coalition ABDE causes bwd70 to be Higher than Average
+#### Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABDE, dataABDE, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABDE, dataABDE, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABDE", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+```{r, include = FALSE}
+ABCDE = c(32.11, 33.56, 35.08, 34.87, 38.59, 27.88, 32.6, 32.85, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABCDE = c(five,six,seven,nine,ten,twelve,fourteen,fifteen)
+
+ABCDM = c(30.53, 28.31, 27.88, 32.85, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABCDM = c(five,seven,nine,ten,fourteen,fifteen)
+
+ABCDF = c(33.56, 35.08, 34.87, 27.88, 32.85, 29.42, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABCDF = c(six,seven,nine,ten,eleven,twelve,fourteen,fifteen)
+
+ABCEF = c(33.56, 35.08, 34.87, 27.88, 32.85, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABCEF = c(six,seven,nine,ten,twelve,fourteen,fifteen)
+
+ABDEF = c(33.56, 35.08, 34.87, 27.88, 32.85, 36.57, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataABDEF = c(six,seven,nine,ten,12,fourteen,fifteen)
+
+ACDEF = c(33.56, 35.08, 34.87, 27.88, 32.85, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataACDEF = c(six,seven,nine,ten,twelve,fourteen,fifteen)
+
+BCDEF = c(33.56, 35.08, 34.87, 27.88, 32.85, 36.33, 34.56, 28.39, 42.08, 33.93, 35.1, 33.28, 35.92)
+dataBCDEF = c(six,seven,nine,ten,twelve,thirteen,fourteen,fifteen)
+```
+
+### Coalition ABCDE causes bwd70 to be Higher than Average
+#### Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABCDE, dataABCDE, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABCDE, dataABCDE, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABCDE", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+### Coalition ABCDM causes bwd70 to be Lower than Average
+#### Groupings of 5, 7, 9, 10, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABCDM, dataABCDM, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABCDM, dataABCDM, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABCDM", "Data"),
+        main = "Homozygous Reduction \n Groupings of 5, 7, 9, 10, 14, and 15 Mutations")
+```
+
+### Coalition ABCDF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, 11, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABCDF, dataABCDF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABCDF, dataABCDF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABCDF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, 11, 12, 14, and 15 Mutations")
+```
+
+### Coalition ABCEF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABCEF, dataABCEF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABCEF, dataABCEF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABCEF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+### Coalition ABDEF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABDEF, dataABDEF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABDEF, dataABDEF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABDEF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+### Coalition ACDEF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ACDEF, dataACDEF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ACDEF, dataACDEF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ACDEF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, 12, 14, and 15 Mutations")
+```
+
+### Coalition BCDEF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, and 12 to 15 Mutations
+
+```{r, echo=FALSE}
+t.test(BCDEF, dataBCDEF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(BCDEF, dataBCDEF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition BCDEF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, and 12 to 15 Mutations")
+```
+
+```{r, include=FALSE}
+ABCDEF = c(33.56, 35.08, 34.87, 27.88, 32.85, 36.33, 42.08, 33.93, 35.1, 33.28, 35.92)
+
+dataABCDEF = c(six,seven,nine,ten,twelve,fourteen,fifteen)
+```
+### Coalition ABCDEF causes bwd70 to be Higher than Average
+#### Groupings of 6, 7, 9, 10, 12, 14, 15 Mutations
+
+```{r, echo=FALSE}
+t.test(ABCDEF, dataABCDEF, alternative=c("two.sided"))
+```
+
+```{r, echo=FALSE}
+boxplot(ABCDEF, dataABCDEF, alternative=c("two.sided"), 
+        ylab = "Body Weight at Day 70", names = c("Coalition ABCDEF", "Data"),
+        main = "Homozygous Reduction \n Groupings of 6, 7, 9, 10, 12, 14, 15 Mutations")
+```
