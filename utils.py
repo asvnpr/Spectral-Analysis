@@ -16,6 +16,8 @@ from operator import itemgetter, attrgetter
 import random
 import string
 import math
+from prettytable import PrettyTable
+
 
 # input: string, string
 # output: matrix
@@ -938,24 +940,28 @@ def find_real_fis(gene_mut, DV, k, order):
 
     # capture correct data vector from results for given k and order
     real_fis = []
+    fs = []
     for i in range(len(DV)):
         if(int(DV[i][0]) == int(k)):
             fs = DV[i][1]
 
-    # create a new list containing the values and coalitions that actually occur in the data
-    for fi in range(1, len(fs)):
-        f = fs[fi]
-        newf = []
-        lexOrder = alphabet_choose_k(list(range(num_muts)), fi)
-        # create new variable with the names of the coalition (more user friendly)
-        lexOrderLetters = alphabet_choose_k(string.ascii_uppercase[:num_muts], fi)
-        labels = []
-        for tup in lexOrderLetters:
-            labels.append(', '.join(tup))
-        for lex in range(len(lexOrder)):
-            if(isin_data(lexOrder[lex], combs)):
-                newf.append( (labels[lex], lexOrder[lex], round(f[lex],5)) )
-        real_fis.append(newf)
+    if(fs):
+        # create a new list containing the values and coalitions that actually occur in the data
+        for fi in range(1, len(fs)):
+            f = fs[fi]
+            newf = []
+            lexOrder = alphabet_choose_k(list(range(num_muts)), fi)
+            # create new variable with the names of the coalition (more user friendly)
+            lexOrderLetters = alphabet_choose_k(string.ascii_uppercase[:num_muts], fi)
+            labels = []
+            for tup in lexOrderLetters:
+                labels.append(', '.join(tup))
+            for lex in range(len(lexOrder)):
+                if(isin_data(lexOrder[lex], combs)):
+                    newf.append( (labels[lex], lexOrder[lex], round(f[lex],5)) )
+            real_fis.append(newf)
+    else:
+        return []
     
     # get values rounded to 5 decimals (descending)
     if(int(k) == 1):
@@ -1036,33 +1042,58 @@ def coalition_table(gene_mut, num_muts, min_vectors, maj_vectors, coalition, sav
     coalition_table = []
 
     for k in ks:
-        # search for k in correct variable
-        if(k > np.floor(num_muts/2)):
-            res = min_vectors
-        else:
+        if(int(k) <= int(np.floor(num_muts/2)) and int(order) <= int(k)):
+#             if(int(k) == 7):
+#                 print("7 maj")
             res = maj_vectors
+    
+            # get real values of grouping k
+            listLook = find_real_fis(gene_mut, res, k, order)
+            
+            # go through the list looking for a match of coalitions you are interested in
+            for index in range(len(listLook)):
+#                 if(int(k) == 7):
+#                     print(listLook[index][1])
+                if(listLook[index][1] == tuple(coal)):
+#                     print("here", index)
+                    if(listLook[index][2] < 0):
+                        place = len(listLook)-index
+                    else:
+                        place = index+1
+                    coalition_table.append([int(k),listLook[index][2],"%d°"%(place)])
+        
+#             if(int(k) == 7 or int(k)==8):
+#                 print("coal table", coalition_table)
+        elif(int(k) > int(np.floor(num_muts/2)) and int(order) <= int(num_muts-k)):
+#             if(int(k)==8):
+#                 print("8 min")
+            res = min_vectors
 
-        # get real values of grouping k
-        listLook = find_real_fis(gene_mut, res, k, order)
+            # get real values of grouping k
+            listLook = find_real_fis(gene_mut, res, k, order)
 
-        # go through the list looking for a match of coalitions you are interested in
-        for index in range(len(listLook)):
-            if(listLook[index][1] == tuple(coal)):
-                if(listLook[index][2] < 0):
-                    place = len(listLook)-index
-                else:
-                    place = index+1
-                coalition_table.append([int(k),listLook[index][2],"%d°"%(place)])
+            # go through the list looking for a match of coalitions you are interested in
+            for index in range(len(listLook)):
+                if(listLook[index][1] == tuple(coal)):
+                    if(listLook[index][2] < 0):
+                        place = len(listLook)-index
+                    else:
+                        place = index+1
+                    coalition_table.append([int(k),listLook[index][2],"%d°"%(place)])
+#                 if(int(k) == 7 or int(k)==8):
+#                     print("coal table", coalition_table)
 
     # create dataframe with data
-    dataframe = pd.DataFrame(coalition_table, columns=["Grouping","Value","Position"])
-    dataframe1 = dataframe.style.applymap(color_negative_red)
+    if(coalition_table):
+        dataframe = pd.DataFrame(coalition_table, columns=["Grouping","Value","Position"])
+        dataframe1 = dataframe.style.applymap(color_negative_red)
     # save the latex code for table in file
     if(save == 1):
         with open(file,'a') as tf:
             s = latex_table2(num_muts, dataframe, coalition)
             tf.write(s)
-    return dataframe1
+    if(coalition_table):
+        return dataframe1
 
     # the following function was taken from
 # https://pandas.pydata.org/pandas-docs/stable/style.html
@@ -1347,7 +1378,7 @@ def scatterplot_colored(data, phenotype, reduction, save, file, colors, coal1, c
         if(len(list3)>1):
             for i in range(1,len(list3)):
                 plt.scatter(x = [list3[i]] ,y=[pheno[list3[i]]], c = colors[2])
-            
+
     # x and y labels
     plt.xlabel("Observations (In No Specific Order)") #this should remain the same
     plt.ylabel("%s Level"%phenotype) #this should remain the same
@@ -1358,7 +1389,7 @@ def scatterplot_colored(data, phenotype, reduction, save, file, colors, coal1, c
         plt.title("%s Reduction Dataset \n Coalition %s"%(reduction, coal1))
     plt.tight_layout()
     # limits of y axis
-    plt.ylim(min(pheno)-5, max(pheno)+5)  
+    plt.ylim(min(pheno), max(pheno))  
     # average lines
     plt.axhline(y = average, color = 'k', linewidth=1.2, label="Average \n %d"%average)
     plt.axhline(y = avg1, color = colors[0], linewidth=1.2, label="%s Avg. \n %d"%(coal1,avg1))
@@ -1419,5 +1450,33 @@ def get_response(num_muts, k, muts, pdata):
     # return list of hemoglobin and mutations
     return pheno, mutation_combinations
 
+
+# input: list, list
+# output: void
+# takes min_vectors and maj_vectors and prints a table
+# of where each grouping is located in the vectors and the
+# index of each 
+def print_indeces(minvs, majvs):
+    types = []
+    ks = []
+    indeces = []
+    amount = []
+    x = PrettyTable()
+    x.field_names = ["Vector", "Grouping K", "Index", "Num. of Orders"]
+    for i in range(len(majvs)):
+        types.append("majorities")
+        ks.append(int(majvs[i][0]))
+        indeces.append(i)
+        order = len(majvs[i][1])-1
+        amount.append(order)
+    for i in range(len(minvs)):
+        types.append("minorities")
+        ks.append(int(minvs[i][0]))
+        indeces.append(i)
+        order = len(minvs[i][1])-1
+        amount.append(order)
+    for i in range(len(ks)):
+        x.add_row([types[i], ks[i], indeces[i], amount[i]])
+    print(x)
 
 
