@@ -1,15 +1,4 @@
 numpy
 pandas 
 scipy
-types
-itertools
-pylab
-timeit
 matplotlib
-csv
-os
-sys
-operator
-random
-string
-math
